@@ -1,99 +1,72 @@
-import React, { useState } from 'react';
-import './App.css'; 
-import { BrowserRouter , useNavigate ,  Routes, Route } from 'react-router-dom';
-import ChatBotUI from './ChatBotUI';
-import loginpage from './LoginPage'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
+import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
+import ChatBot from './components/ChatBot';
+import StudentPrompt from './components/StudentPrompt';
+import Feedback from './components/Feedback';
+import ChatHistory from './components/ChatHistory';
+import LoadingSpinner from './components/LoadingSpinner';
+import './styles/App.css';
+import './styles/components.css';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  //const navigate = useNavigate();
-
-  const handleLogin = (event) => {
-    event.preventDefault();
-
-    if (!email || !password) {
-      setError('Both fields are required');
-      return;
-    }
-
-    console.log('Logging in with:', email, password);
-    alert('Login successful!');
-   // navigate('/chat');
-  };
-
-  return (
-    <div className="login-page">
-      <div className="left-panel">
-        <h1>AI - Tutor</h1>
-        <p>Welcome back! Enhance your learning with our AI-driven guidance.</p>
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <LoadingSpinner size="large" text="Loading..." />
       </div>
-
-      <div className="right-panel">
-        <div className="login-box">
-          <h2>Login to AI Tutor</h2>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<loginpage />} /> {/* Login page route */}
-              <Route path="/chat" element={<ChatBotUI />} /> {/* Chatbot page route */}
-            </Routes>
-            </BrowserRouter>
-            
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            <button type="submit" className="login-button">Login</button>
-          </form>
-
-          <div className="divider"><span>or</span></div>
-
-          <div className="social-login">
-            <button className="google-login">
-              <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google" />
-              Login with Google
-            </button>
-            <button className="github-login">
-              <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub" />
-              Login with GitHub
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-export default LoginPage;
+function App() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat" element={
+                <ProtectedRoute>
+                  <ChatBot />
+                </ProtectedRoute>
+              } />
+              <Route path="/student-prompt" element={
+                <ProtectedRoute>
+                  <StudentPrompt />
+                </ProtectedRoute>
+              } />
+              <Route path="/feedback" element={
+                <ProtectedRoute>
+                  <Feedback />
+                </ProtectedRoute>
+              } />
+              <Route path="/history" element={
+                <ProtectedRoute>
+                  <ChatHistory />
+                </ProtectedRoute>
+              } />
+              <Route path="/" element={<Navigate to="/login" />} />
+              <Route path="*" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+}
 
-
-
-
-
-
-
-
+export default App;
