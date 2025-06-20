@@ -14,6 +14,7 @@ const LoadingSpinner = ({ size = 'medium', color = '#3b82f6', text = '' }) => {
         style={{ borderTopColor: color }}
       />
       {text && <span className="loading-text">{text}</span>}
+      }
     </div>
   );
 };
