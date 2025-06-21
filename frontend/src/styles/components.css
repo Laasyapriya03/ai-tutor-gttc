@@ -236,6 +236,79 @@
   margin: 0;
 }
 
+/* Conversation Title in Chat Header */
+.conversation-title {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 400;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Clear All History Button */
+.clear-all-btn {
+  padding: 0.5rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Message Actions */
+.message-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.25rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Quick Prompt Buttons */
+.quick-prompt-btn {
+  padding: 0.5rem 1rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.quick-prompt-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  transform: translateY(-1px);
+}
+
 /* Enhanced Form Styles */
 .form-group select {
   width: 100%;
@@ -274,6 +347,31 @@
   display: none;
 }
 
+/* Loading Spinner */
+.loading-spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Mobile Responsiveness Enhancements */
 @media (max-width: 768px) {
   .resource-card {
@@ -296,8 +394,25 @@
     gap: 0.5rem;
   }
   
+  .conversation-title {
+    max-width: none;
+  }
+  
   .rating-options {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+  
+  .quick-suggestions {
+    flex-direction: column;
+  }
+  
+  .quick-prompt-btn {
+    white-space: normal;
+    text-align: center;
+  }
+  
+  .message-actions {
+    justify-content: center;
   }
 }

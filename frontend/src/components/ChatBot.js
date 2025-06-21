@@ -24,15 +24,20 @@ const ChatBot = () => {
     error,
     messagesEndRef,
     sendMessage,
-    clearChat
+    clearChat,
+    loadConversation,
+    conversationTitle,
+    setConversationTitle
   } = useChat(initialMessages);
 
-  // Handle initial prompt from StudentPrompt component
+  // Handle initial prompt from StudentPrompt component or load existing conversation
   useEffect(() => {
     if (location.state?.initialPrompt) {
       sendMessage(location.state.initialPrompt);
+    } else if (location.state?.chatId && location.state?.loadConversation) {
+      loadConversation(location.state.chatId);
     }
-  }, [location.state, sendMessage]);
+  }, [location.state, sendMessage, loadConversation]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -61,6 +66,16 @@ const ChatBot = () => {
     // You could add a toast notification here
   };
 
+  const handleClearChat = () => {
+    if (window.confirm('Are you sure you want to clear this chat? This will start a new conversation.')) {
+      clearChat();
+      // Reset to initial welcome message
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
+  };
+
   const quickPrompts = [
     'Explain CNC programming basics',
     'What are industrial safety protocols?',
@@ -78,9 +93,12 @@ const ChatBot = () => {
         <div className="chat-title">
           <Bot size={24} />
           <h2>GTTC Learning Assistant</h2>
+          {conversationTitle && (
+            <span className="conversation-title">- {conversationTitle}</span>
+          )}
         </div>
         <div className="chat-actions">
-          <button onClick={clearChat} className="clear-btn">
+          <button onClick={handleClearChat} className="clear-btn">
             Clear Chat
           </button>
           <div className="status-indicator">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, History, Search, Calendar, MessageCircle, Clock, Filter } from 'lucide-react';
+import { ArrowLeft, History, Search, MessageCircle, Clock, Filter } from 'lucide-react';
 
 const ChatHistory = () => {
   const navigate = useNavigate();
@@ -8,63 +8,31 @@ const ChatHistory = () => {
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [filters, setFilters] = useState({
     search: '',
-    dateFrom: '',
-    dateTo: '',
     category: 'all'
   });
 
-  // Mock chat history data
+  // Load chat history from localStorage
   useEffect(() => {
-    const mockHistory = [
-      {
-        id: 1,
-        date: new Date('2024-01-15'),
-        title: 'CNC Programming Basics',
-        preview: 'Discussed G-code fundamentals and coordinate systems for CNC machining...',
-        category: 'Manufacturing',
-        messageCount: 12,
-        duration: '25 min'
-      },
-      {
-        id: 2,
-        date: new Date('2024-01-14'),
-        title: 'Safety Protocols in Workshop',
-        preview: 'Learned about lockout/tagout procedures and personal protective equipment...',
-        category: 'Safety',
-        messageCount: 8,
-        duration: '18 min'
-      },
-      {
-        id: 3,
-        date: new Date('2024-01-13'),
-        title: 'Quality Control Methods',
-        preview: 'Explored statistical process control and measurement techniques...',
-        category: 'Quality',
-        messageCount: 15,
-        duration: '32 min'
-      },
-      {
-        id: 4,
-        date: new Date('2024-01-12'),
-        title: 'PLC Programming Introduction',
-        preview: 'Introduction to ladder logic and basic PLC programming concepts...',
-        category: 'Automation',
-        messageCount: 20,
-        duration: '45 min'
-      },
-      {
-        id: 5,
-        date: new Date('2024-01-11'),
-        title: 'Preventive Maintenance',
-        preview: 'Discussed maintenance scheduling and equipment care procedures...',
-        category: 'Maintenance',
-        messageCount: 10,
-        duration: '22 min'
+    const loadChatHistory = () => {
+      try {
+        const savedHistory = localStorage.getItem('gttc_chat_history');
+        if (savedHistory) {
+          const parsedHistory = JSON.parse(savedHistory);
+          setChatHistory(parsedHistory);
+          setFilteredHistory(parsedHistory);
+        } else {
+          // If no history exists, show empty state
+          setChatHistory([]);
+          setFilteredHistory([]);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        setChatHistory([]);
+        setFilteredHistory([]);
       }
-    ];
-    
-    setChatHistory(mockHistory);
-    setFilteredHistory(mockHistory);
+    };
+
+    loadChatHistory();
   }, []);
 
   useEffect(() => {
@@ -76,17 +44,6 @@ const ChatHistory = () => {
         chat.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         chat.preview.toLowerCase().includes(filters.search.toLowerCase())
       );
-    }
-
-    // Date filters
-    if (filters.dateFrom) {
-      const fromDate = new Date(filters.dateFrom);
-      filtered = filtered.filter(chat => chat.date >= fromDate);
-    }
-
-    if (filters.dateTo) {
-      const toDate = new Date(filters.dateTo);
-      filtered = filtered.filter(chat => chat.date <= toDate);
     }
 
     // Category filter
@@ -106,16 +63,16 @@ const ChatHistory = () => {
   };
 
   const handleChatClick = (chatId) => {
-    // In a real app, you would load the specific chat conversation
-    navigate('/chat', { state: { chatId } });
+    // Load the specific chat conversation
+    navigate('/chat', { state: { chatId, loadConversation: true } });
   };
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  const clearAllHistory = () => {
+    if (window.confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
+      localStorage.removeItem('gttc_chat_history');
+      setChatHistory([]);
+      setFilteredHistory([]);
+    }
   };
 
   const getCategoryColor = (category) => {
@@ -124,9 +81,16 @@ const ChatHistory = () => {
       'Safety': 'bg-red-500',
       'Quality': 'bg-green-500',
       'Automation': 'bg-purple-500',
-      'Maintenance': 'bg-orange-500'
+      'Maintenance': 'bg-orange-500',
+      'General': 'bg-gray-500'
     };
     return colors[category] || 'bg-gray-500';
+  };
+
+  const calculateDuration = (messageCount) => {
+    // Estimate duration based on message count (roughly 2 minutes per message)
+    const estimatedMinutes = Math.max(1, Math.round(messageCount * 1.5));
+    return `${estimatedMinutes} min`;
   };
 
   return (
@@ -140,6 +104,11 @@ const ChatHistory = () => {
             <History size={28} color="#8b5cf6" />
             <h1>Chat History</h1>
           </div>
+          {chatHistory.length > 0 && (
+            <button onClick={clearAllHistory} className="clear-all-btn">
+              Clear All History
+            </button>
+          )}
         </div>
       </header>
 
@@ -162,31 +131,6 @@ const ChatHistory = () => {
             </div>
 
             <div className="filter-group">
-              <label htmlFor="dateFrom">
-                <Calendar size={16} />
-                From Date
-              </label>
-              <input
-                type="date"
-                id="dateFrom"
-                name="dateFrom"
-                value={filters.dateFrom}
-                onChange={handleFilterChange}
-              />
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="dateTo">To Date</label>
-              <input
-                type="date"
-                id="dateTo"
-                name="dateTo"
-                value={filters.dateTo}
-                onChange={handleFilterChange}
-              />
-            </div>
-
-            <div className="filter-group">
               <label htmlFor="category">
                 <Filter size={16} />
                 Category
@@ -203,30 +147,38 @@ const ChatHistory = () => {
                 <option value="Quality">Quality</option>
                 <option value="Automation">Automation</option>
                 <option value="Maintenance">Maintenance</option>
+                <option value="General">General</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div className="history-summary">
-          <div className="summary-stats">
-            <div className="stat-item">
-              <MessageCircle size={20} />
-              <span>{filteredHistory.length} Conversations</span>
-            </div>
-            <div className="stat-item">
-              <Clock size={20} />
-              <span>{filteredHistory.reduce((total, chat) => total + parseInt(chat.duration), 0)} min total</span>
+        {chatHistory.length > 0 && (
+          <div className="history-summary">
+            <div className="summary-stats">
+              <div className="stat-item">
+                <MessageCircle size={20} />
+                <span>{filteredHistory.length} Conversations</span>
+              </div>
+              <div className="stat-item">
+                <Clock size={20} />
+                <span>{filteredHistory.reduce((total, chat) => total + parseInt(chat.duration), 0)} min total</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="history-list">
           {filteredHistory.length === 0 ? (
             <div className="no-results">
               <History size={48} color="#94a3b8" />
-              <h3>No conversations found</h3>
-              <p>Try adjusting your search criteria or start a new conversation.</p>
+              <h3>{chatHistory.length === 0 ? 'No chat history yet' : 'No conversations found'}</h3>
+              <p>
+                {chatHistory.length === 0 
+                  ? 'Start a conversation with the AI assistant to see your chat history here.'
+                  : 'Try adjusting your search criteria or start a new conversation.'
+                }
+              </p>
               <button 
                 onClick={() => navigate('/chat')}
                 className="start-chat-btn"
@@ -247,9 +199,6 @@ const ChatHistory = () => {
                     <span className={`category-badge ${getCategoryColor(chat.category)}`}>
                       {chat.category}
                     </span>
-                  </div>
-                  <div className="history-date">
-                    {formatDate(chat.date)}
                   </div>
                 </div>
                 
