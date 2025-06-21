@@ -34,6 +34,8 @@ const ChatBot = () => {
   useEffect(() => {
     if (location.state?.initialPrompt) {
       sendMessage(location.state.initialPrompt);
+      // Clear the state to prevent re-sending on re-renders
+      window.history.replaceState({}, document.title);
     } else if (location.state?.chatId && location.state?.loadConversation) {
       loadConversation(location.state.chatId);
     }
@@ -54,6 +56,7 @@ const ChatBot = () => {
   };
 
   const handleQuickPrompt = (promptText) => {
+    if (isLoading) return;
     setInput(promptText);
   };
 
@@ -204,6 +207,7 @@ const ChatBot = () => {
                 key={index}
                 onClick={() => handleQuickPrompt(prompt)}
                 className="quick-prompt-btn"
+                disabled={isLoading}
               >
                 {prompt}
               </button>

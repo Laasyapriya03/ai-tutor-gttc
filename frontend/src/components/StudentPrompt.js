@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Wrench, Cog, Shield, Zap, Users, Factory, TrendingUp, Settings } from 'lucide-react';
 
 const StudentPrompt = () => {
   const navigate = useNavigate();
   const [selectedPrompt, setSelectedPrompt] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const promptCategories = [
     {
@@ -189,11 +190,21 @@ const StudentPrompt = () => {
     }
   ];
 
-  const handlePromptSelect = (prompt) => {
+  // Prevent multiple rapid clicks and handle navigation properly
+  const handlePromptSelect = useCallback((prompt) => {
+    if (isNavigating) return; // Prevent multiple clicks
+    
+    setIsNavigating(true);
     setSelectedPrompt(prompt);
-    // Navigate to chat with the selected prompt
-    navigate('/chat', { state: { initialPrompt: prompt.content } });
-  };
+    
+    // Small delay to show selection feedback
+    setTimeout(() => {
+      navigate('/chat', { 
+        state: { initialPrompt: prompt.content },
+        replace: false // Don't replace history
+      });
+    }, 150);
+  }, [navigate, isNavigating]);
 
   return (
     <div className="student-prompt-container">
@@ -228,9 +239,13 @@ const StudentPrompt = () => {
               <div className="prompts-list">
                 {category.prompts.map((prompt) => (
                   <div
-                    key={prompt.id}
-                    className="prompt-item"
+                    key={`${category.id}-${prompt.id}`}
+                    className={`prompt-item ${selectedPrompt?.id === prompt.id ? 'selected' : ''}`}
                     onClick={() => handlePromptSelect(prompt)}
+                    style={{ 
+                      pointerEvents: isNavigating ? 'none' : 'auto',
+                      opacity: isNavigating && selectedPrompt?.id === prompt.id ? 0.7 : 1
+                    }}
                   >
                     <h4>{prompt.title}</h4>
                     <p>{prompt.description}</p>
@@ -250,6 +265,7 @@ const StudentPrompt = () => {
               <button 
                 onClick={() => navigate('/chat')}
                 className="resource-btn"
+                disabled={isNavigating}
               >
                 Start Custom Session
               </button>
@@ -264,6 +280,7 @@ const StudentPrompt = () => {
               <button 
                 onClick={() => navigate('/feedback')}
                 className="resource-btn"
+                disabled={isNavigating}
               >
                 Provide Feedback
               </button>

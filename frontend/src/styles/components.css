@@ -300,9 +300,13 @@
   color: #1e293b;
 }
 
-/* Enhanced Quick Suggestions */
+/* Enhanced Quick Suggestions - FIXED */
 .quick-suggestions {
   margin-bottom: 1rem;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .suggestions-header {
@@ -310,35 +314,44 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
-  color: #64748b;
+  color: #374151;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .suggestions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 0.75rem;
 }
 
+/* Quick Prompt Buttons - FIXED */
 .quick-prompt-btn {
   padding: 0.75rem 1rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #374151;
   text-align: left;
   line-height: 1.4;
+  font-weight: 400;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .quick-prompt-btn:hover {
-  background: #e2e8f0;
+  background: #f9fafb;
+  border-color: #3b82f6;
   color: #1e293b;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quick-prompt-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Enhanced Chat Footer */
@@ -382,9 +395,15 @@
   margin: 0;
 }
 
-/* Message Text Formatting */
+/* Message Text Formatting - IMPROVED VISIBILITY */
 .message-text {
   line-height: 1.6;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.user-message .message-text {
+  color: white;
 }
 
 .message-text strong {
@@ -402,10 +421,12 @@
   border-radius: 4px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875em;
+  color: #1e293b;
 }
 
 .user-message .message-text code {
   background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 /* Message Metadata (Development) */
@@ -510,6 +531,52 @@
   gap: 1rem;
 }
 
+/* Student Prompt Items - FIXED REPETITION ISSUE */
+.prompt-item {
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-item:hover {
+  background: #f1f5f9;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prompt-item:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.prompt-item h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.prompt-item p {
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Prevent text selection on prompt items to avoid repetition */
+.prompt-item {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 /* Mobile Responsiveness Enhancements */
 @media (max-width: 768px) {
   .resource-card {
@@ -565,5 +632,23 @@
   .footer-links {
     flex-direction: column;
     align-items: center;
+  }
+
+  /* Mobile chat message improvements */
+  .message {
+    max-width: 95%;
+  }
+
+  .message-text {
+    font-size: 0.9rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .quick-suggestions {
+    padding: 0.75rem;
+  }
+
+  .suggestions-header {
+    font-size: 0.8rem;
   }
 }
