@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Send, Bot, User, Loader, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, Send, Bot, User, Loader, Copy, ThumbsUp, ThumbsDown, BookOpen, Lightbulb } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 
 const ChatBot = () => {
@@ -8,11 +8,11 @@ const ChatBot = () => {
   const location = useLocation();
   const [input, setInput] = useState('');
   
-  // Initialize chat with welcome message
+  // Initialize chat with enhanced welcome message
   const initialMessages = [
     { 
       type: 'bot', 
-      text: 'Hello! I\'m your GTTC Learning Assistant. I specialize in technical training topics including manufacturing, automation, safety protocols, and quality control. How can I help you learn today?',
+      text: 'Welcome to the GTTC Learning Assistant! 🎓\n\nI\'m your specialized technical training companion with comprehensive knowledge in:\n\n🔧 **Manufacturing Processes** - CNC programming, machining, quality control\n⚡ **Industrial Automation** - PLC programming, SCADA systems, robotics\n🛡️ **Safety Protocols** - LOTO procedures, PPE selection, hazard analysis\n🔨 **Equipment Maintenance** - Preventive, predictive, and reliability-centered maintenance\n📊 **Quality Management** - Six Sigma, ISO standards, measurement techniques\n🏭 **Manufacturing Processes** - Metal cutting, welding, heat treatment\n\nI provide detailed, contextual answers and avoid repetitive responses. How can I help advance your technical knowledge today?',
       timestamp: new Date(),
       id: 1
     }
@@ -76,13 +76,30 @@ const ChatBot = () => {
     // You could add a toast notification here
   };
 
+  // Enhanced quick prompts with more specific GTTC topics
   const quickPrompts = [
-    'Explain CNC programming basics',
-    'What are industrial safety protocols?',
-    'How does quality control work?',
-    'Tell me about PLC programming',
-    'Preventive maintenance procedures'
+    'Explain CNC G-code programming basics with examples',
+    'What are the 6 steps of LOTO procedure?',
+    'How does Statistical Process Control (SPC) work?',
+    'Describe PLC ladder logic programming fundamentals',
+    'What is predictive maintenance and its techniques?',
+    'Explain the 8 wastes in lean manufacturing',
+    'How do you select appropriate PPE for different hazards?',
+    'What is Six Sigma DMAIC methodology?'
   ];
+
+  // Format message text with better structure
+  const formatMessageText = (text) => {
+    // Convert markdown-style formatting to HTML
+    let formattedText = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+    
+    return { __html: formattedText };
+  };
 
   return (
     <div className="chatbot-container">
@@ -119,7 +136,7 @@ const ChatBot = () => {
             </div>
             <div className="message-content">
               <div className={`message-text ${msg.isError ? 'error-message' : ''}`}>
-                {msg.text}
+                <div dangerouslySetInnerHTML={formatMessageText(msg.text)} />
               </div>
               <div className="message-footer">
                 <div className="message-time">{formatTime(msg.timestamp)}</div>
@@ -141,6 +158,13 @@ const ChatBot = () => {
                   </div>
                 )}
               </div>
+              
+              {/* Show metadata for debugging in development */}
+              {process.env.NODE_ENV === 'development' && msg.metadata && (
+                <div className="message-metadata">
+                  <small>Search Results: {msg.metadata.searchResults?.length || 0}</small>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -153,7 +177,7 @@ const ChatBot = () => {
             <div className="message-content">
               <div className="typing-indicator">
                 <Loader className="spinner" size={16} />
-                <span>Assistant is thinking...</span>
+                <span>Analyzing your question and searching knowledge base...</span>
               </div>
             </div>
           </div>
@@ -170,15 +194,21 @@ const ChatBot = () => {
 
       <div className="chat-input-container">
         <div className="quick-suggestions">
-          {quickPrompts.map((prompt, index) => (
-            <button
-              key={index}
-              onClick={() => handleQuickPrompt(prompt)}
-              className="quick-prompt-btn"
-            >
-              {prompt}
-            </button>
-          ))}
+          <div className="suggestions-header">
+            <Lightbulb size={16} />
+            <span>Quick Topics:</span>
+          </div>
+          <div className="suggestions-grid">
+            {quickPrompts.map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => handleQuickPrompt(prompt)}
+                className="quick-prompt-btn"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
         </div>
         
         <div className="chat-input">
@@ -186,7 +216,7 @@ const ChatBot = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me anything about technical training, manufacturing, safety, or automation..."
+            placeholder="Ask me anything about GTTC technical training - CNC programming, safety procedures, automation, quality control, maintenance, or manufacturing processes..."
             rows="1"
             disabled={isLoading}
           />
@@ -200,8 +230,14 @@ const ChatBot = () => {
         </div>
         
         <div className="chat-footer">
+          <div className="footer-links">
+            <button onClick={() => navigate('/student-prompt')} className="footer-link">
+              <BookOpen size={16} />
+              Browse Learning Modules
+            </button>
+          </div>
           <p className="disclaimer">
-            GTTC Learning Assistant provides educational information. Always follow official procedures and consult with instructors for practical applications.
+            GTTC Learning Assistant provides educational information based on technical training curriculum. Always follow official procedures and consult with instructors for practical applications.
           </p>
         </div>
       </div>

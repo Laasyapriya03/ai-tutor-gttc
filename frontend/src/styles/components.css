@@ -45,6 +45,9 @@
 /* Additional Resource Styles */
 .additional-resources {
   margin-top: 3rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
 }
 
 .resource-card {
@@ -56,6 +59,12 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
 }
 
 .resource-card h3 {
@@ -68,6 +77,7 @@
 .resource-card p {
   color: #64748b;
   margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .resource-btn {
@@ -290,23 +300,126 @@
   color: #1e293b;
 }
 
-/* Quick Prompt Buttons */
+/* Enhanced Quick Suggestions */
+.quick-suggestions {
+  margin-bottom: 1rem;
+}
+
+.suggestions-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
 .quick-prompt-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #64748b;
-  white-space: nowrap;
+  color: #374151;
+  text-align: left;
+  line-height: 1.4;
 }
 
 .quick-prompt-btn:hover {
   background: #e2e8f0;
   color: #1e293b;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Chat Footer */
+.chat-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-link:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Message Text Formatting */
+.message-text {
+  line-height: 1.6;
+}
+
+.message-text strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.message-text em {
+  font-style: italic;
+}
+
+.message-text code {
+  background: #f1f5f9;
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+}
+
+.user-message .message-text code {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Message Metadata (Development) */
+.message-metadata {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.message-metadata small {
+  color: #64748b;
+  font-size: 0.75rem;
 }
 
 /* Enhanced Form Styles */
@@ -372,11 +485,40 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Clear Chat Button */
+.clear-btn {
+  padding: 0.5rem 1rem;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Chat Actions */
+.chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 /* Mobile Responsiveness Enhancements */
 @media (max-width: 768px) {
   .resource-card {
     flex-direction: column;
     text-align: center;
+  }
+  
+  .additional-resources {
+    grid-template-columns: 1fr;
   }
   
   .feedback-info {
@@ -403,16 +545,25 @@
     gap: 0.5rem;
   }
   
-  .quick-suggestions {
-    flex-direction: column;
+  .suggestions-grid {
+    grid-template-columns: 1fr;
   }
   
   .quick-prompt-btn {
-    white-space: normal;
     text-align: center;
   }
   
   .message-actions {
     justify-content: center;
+  }
+  
+  .chat-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
   }
 }

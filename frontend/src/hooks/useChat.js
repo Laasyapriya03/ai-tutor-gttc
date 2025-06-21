@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { chatAPI } from '../utils/api';
+import { searchDatabase, generateContextualResponse, ResponseIntelligence } from '../data/learningDatabase';
+
+// Initialize response intelligence system
+const responseIntelligence = new ResponseIntelligence();
 
 // Custom hook for managing chat functionality
 export const useChat = (initialMessages = []) => {
@@ -88,14 +91,16 @@ export const useChat = (initialMessages = []) => {
     
     if (allText.includes('cnc') || allText.includes('manufacturing') || allText.includes('machining')) {
       return 'Manufacturing';
-    } else if (allText.includes('safety') || allText.includes('hazard') || allText.includes('ppe')) {
+    } else if (allText.includes('safety') || allText.includes('hazard') || allText.includes('ppe') || allText.includes('loto')) {
       return 'Safety';
-    } else if (allText.includes('quality') || allText.includes('control') || allText.includes('inspection')) {
+    } else if (allText.includes('quality') || allText.includes('control') || allText.includes('inspection') || allText.includes('spc')) {
       return 'Quality';
-    } else if (allText.includes('plc') || allText.includes('automation') || allText.includes('robot')) {
+    } else if (allText.includes('plc') || allText.includes('automation') || allText.includes('robot') || allText.includes('scada')) {
       return 'Automation';
-    } else if (allText.includes('maintenance') || allText.includes('repair') || allText.includes('preventive')) {
+    } else if (allText.includes('maintenance') || allText.includes('repair') || allText.includes('preventive') || allText.includes('predictive')) {
       return 'Maintenance';
+    } else if (allText.includes('lean') || allText.includes('waste') || allText.includes('5s')) {
+      return 'Lean';
     }
     return 'General';
   };
@@ -106,10 +111,34 @@ export const useChat = (initialMessages = []) => {
     return `${estimatedMinutes} min`;
   };
 
+  // Enhanced AI response generation
+  const generateIntelligentResponse = useCallback(async (messageText, currentConversationId) => {
+    // Search the learning database
+    const searchResults = searchDatabase(messageText, currentConversationId, responseIntelligence);
+    
+    // Get conversation context
+    const context = responseIntelligence.getContext(currentConversationId);
+    
+    // Generate contextual response
+    const response = generateContextualResponse(messageText, searchResults, context);
+    
+    return {
+      success: true,
+      data: {
+        message: response,
+        conversation_id: currentConversationId || `conv_${Date.now()}`,
+        searchResults: searchResults,
+        context: context
+      }
+    };
+  }, []);
+
   // Send a message
   const sendMessage = useCallback(async (messageText) => {
     if (!messageText.trim() || isLoading) return;
 
+    const currentConversationId = conversationId || `conv_${Date.now()}`;
+    
     const userMessage = {
       type: 'user',
       text: messageText,
@@ -123,7 +152,10 @@ export const useChat = (initialMessages = []) => {
     setError(null);
 
     try {
-      const response = await simulateAPIResponse(messageText, conversationId);
+      // Add realistic delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
+      
+      const response = await generateIntelligentResponse(messageText, currentConversationId);
       
       if (response.success) {
         const botMessage = {
@@ -131,14 +163,21 @@ export const useChat = (initialMessages = []) => {
           text: response.data.message,
           timestamp: new Date(),
           id: Date.now() + 1,
+          metadata: {
+            searchResults: response.data.searchResults,
+            context: response.data.context
+          }
         };
         
         const finalMessages = [...updatedMessages, botMessage];
         setMessages(finalMessages);
         
-        if (response.data.conversation_id) {
+        if (response.data.conversation_id && !conversationId) {
           setConversationId(response.data.conversation_id);
         }
+
+        // Update response intelligence
+        responseIntelligence.updateContext(currentConversationId, messageText, response.data.message);
 
         // Save to history after bot responds
         setTimeout(() => {
@@ -151,7 +190,7 @@ export const useChat = (initialMessages = []) => {
       setError(err.message);
       const errorMessage = {
         type: 'bot',
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: 'I apologize, but I encountered an error processing your request. Please try rephrasing your question or ask about a specific GTTC technical topic like CNC programming, safety procedures, quality control, automation, or maintenance.',
         timestamp: new Date(),
         id: Date.now() + 1,
         isError: true,
@@ -166,7 +205,7 @@ export const useChat = (initialMessages = []) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, conversationId, messages, conversationTitle, saveConversationToHistory]);
+  }, [isLoading, conversationId, messages, conversationTitle, saveConversationToHistory, generateIntelligentResponse]);
 
   // Clear chat
   const clearChat = useCallback(() => {
@@ -213,48 +252,6 @@ export const useChat = (initialMessages = []) => {
     clearChat,
     loadConversation,
     setConversationTitle,
-  };
-};
-
-// Simulate API response for demo purposes
-const simulateAPIResponse = async (message, conversationId) => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-  const lowerMessage = message.toLowerCase();
-  
-  // GTTC-specific responses
-  const responses = {
-    'cnc': 'CNC (Computer Numerical Control) programming involves creating instructions for automated machine tools. Key concepts include:\n\n• G-codes for machine movements\n• M-codes for machine functions\n• Coordinate systems (absolute/incremental)\n• Tool offsets and work coordinates\n• Feed rates and spindle speeds\n\nWould you like me to explain any specific aspect in more detail?',
-    
-    'safety': 'Industrial safety is paramount in GTTC training. Essential safety protocols include:\n\n• Lockout/Tagout (LOTO) procedures\n• Personal Protective Equipment (PPE)\n• Hazard identification and risk assessment\n• Emergency response procedures\n• Machine guarding and safety devices\n• Chemical handling and storage\n\nWhich safety topic would you like to explore further?',
-    
-    'quality': 'Quality control in manufacturing ensures products meet specifications. Key methods include:\n\n• Statistical Process Control (SPC)\n• Measurement and inspection techniques\n• Calibration procedures\n• Quality management systems\n• Continuous improvement (Kaizen)\n• Six Sigma methodologies\n\nWhat specific quality control aspect interests you?',
-    
-    'automation': 'Industrial automation increases efficiency and precision. Core technologies include:\n\n• Programmable Logic Controllers (PLCs)\n• SCADA systems\n• Human-Machine Interfaces (HMI)\n• Sensors and actuators\n• Industrial robotics\n• Process control systems\n\nWhich automation technology would you like to learn about?',
-    
-    'maintenance': 'Equipment maintenance strategies ensure optimal performance:\n\n• Preventive maintenance scheduling\n• Predictive maintenance techniques\n• Condition monitoring\n• Root cause analysis\n• Maintenance documentation\n• Spare parts management\n\nWhat maintenance topic can I help you with?',
-    
-    'plc': 'PLC (Programmable Logic Controller) programming is essential for automation:\n\n• Ladder logic fundamentals\n• Input/Output configuration\n• Timer and counter functions\n• Data handling and manipulation\n• Communication protocols\n• Troubleshooting techniques\n\nWould you like a specific PLC programming example?',
-    
-    'default': 'Thank you for your question about technical training. As your GTTC Learning Assistant, I can help with:\n\n• Manufacturing processes and CNC programming\n• Industrial safety and protocols\n• Quality control methods\n• Automation and PLC programming\n• Equipment maintenance\n• Technical problem-solving\n\nPlease feel free to ask about any specific technical topic!'
-  };
-
-  // Find matching response
-  let responseText = responses.default;
-  for (const [key, value] of Object.entries(responses)) {
-    if (key !== 'default' && lowerMessage.includes(key)) {
-      responseText = value;
-      break;
-    }
-  }
-
-  return {
-    success: true,
-    data: {
-      message: responseText,
-      conversation_id: conversationId || `conv_${Date.now()}`,
-    },
   };
 };
 
