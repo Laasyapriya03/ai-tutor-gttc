@@ -57,15 +57,6 @@ const ChatBot = () => {
     setInput(promptText);
   };
 
-  const formatTime = (timestamp) => {
-    return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    // You could add a toast notification here
-  };
-
   const handleClearChat = () => {
     if (window.confirm('Are you sure you want to clear this chat? This will start a new conversation.')) {
       clearChat();
@@ -74,6 +65,15 @@ const ChatBot = () => {
         window.location.reload();
       }, 100);
     }
+  };
+
+  const formatTime = (timestamp) => {
+    return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    // You could add a toast notification here
   };
 
   const quickPrompts = [

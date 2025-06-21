@@ -87,12 +87,6 @@ const ChatHistory = () => {
     return colors[category] || 'bg-gray-500';
   };
 
-  const calculateDuration = (messageCount) => {
-    // Estimate duration based on message count (roughly 2 minutes per message)
-    const estimatedMinutes = Math.max(1, Math.round(messageCount * 1.5));
-    return `${estimatedMinutes} min`;
-  };
-
   return (
     <div className="history-container">
       <header className="prompt-header">
